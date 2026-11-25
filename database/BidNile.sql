@@ -270,4 +270,107 @@ ADD CONSTRAINT FK_AuctionFollower_AuctionId
 FOREIGN KEY (AuctionId) REFERENCES AuctionsAndBidding.Auction(Id)
 
 
+-- Task 3.2
+ALTER TABLE Members.[Member]
+ADD AppLanguage CHAR(2) NOT NULL
+	CONSTRAINT DF_Member_AppLanguage DEFAULT 'ar'
+
+
+-- Task 3.3
+ALTER TABLE Catalogue.Item
+ADD IsFeatured BIT NOT NULL
+	CONSTRAINT DF_Item_IsFeatured DEFAULT 0
+
+
+-- Task 3.4
+EXEC sp_rename
+	'AuctionsAndBidding.Bid.IPAddress',
+	'DeviceIp',
+	'COLUMN'
+
+ALTER TABLE WarehousesAndStaff.Warehouse
+DROP CONSTRAINT CK_Warehouse_Capacity
+
+EXEC sp_rename
+	'WarehousesAndStaff.Warehouse.Capacity',
+	'MaxItems',
+	'COLUMN'
+
+ALTER TABLE WarehousesAndStaff.Warehouse
+ADD CONSTRAINT CK_Warehouse_MaxItems
+CHECK(MaxItems > 0)
+
+
+-- Task 3.5
+ALTER TABLE Members.[Member]
+ALTER COLUMN FullName NVARCHAR(150) NOT NULL
+
+
+-- Task 3.6
+ALTER TABLE WarehousesAndStaff.Warehouse
+DROP CK_Warehouse_MaxItems
+
+ALTER TABLE WarehousesAndStaff.Warehouse
+ALTER COLUMN MaxItems SMALLINT NOT NULL  
+
+ALTER TABLE WarehousesAndStaff.Warehouse
+ADD CONSTRAINT CK_Warehouse_MaxItems
+CHECK(MaxItems > 0)
+
+
+-- Task 3.7
+ALTER TABLE Catalogue.Category
+DROP CONSTRAINT CK_Category_Commission
+
+ALTER TABLE Catalogue.Category
+ADD CONSTRAINT CK_Category_Commission
+CHECK(Commission >= 0 AND Commission <= 25)
+
+
+-- Task 3.8
+ALTER TABLE [AuctionsAndBidding].[Auction]
+DROP DF_Auction_Status
+
+ALTER TABLE [AuctionsAndBidding].[Auction]
+ADD CONSTRAINT CK_Auction_Status
+CHECK([Status] IN ('Draft', 'Live', 'Ended', 'Cancelled', 'PendingReview'))
+
+ALTER TABLE [AuctionsAndBidding].[Auction]
+ADD CONSTRAINT DF_Auction_Status
+DEFAULT 'PendingReview' FOR [Status]
+
+
+-- Task 3.9
+ALTER TABLE AuctionsAndBidding.Auction
+ADD BuyNowPrice DECIMAL(18, 2) NULL
+
+ALTER TABLE AuctionsAndBidding.Auction
+ADD CONSTRAINT CK_Auction_BuyNowPrice
+CHECK(BuyNowPrice > StartPrice)
+-- WITH CHECK beacause the table has no rows 
+-- if we assumed that table already has rows, i think it should be NO CHECK as it is NULL
+
+
+-- Task 3.10
+ALTER TABLE Members.[Member]
+ADD CONSTRAINT UQ_Member_Phone
+UNIQUE(Phone)
+
+
+-- Task 3.11
+ALTER TABLE Members.[Member]
+ADD VerifiedAt DATETIME2(3) NULL
+
+ALTER TABLE Members.[Member]
+DROP DF_Member_IsVerified
+
+ALTER TABLE Members.[Member]
+DROP COLUMN IsVerified
+GO
+
+-- Task 3.12
+CREATE SCHEMA Marketing
+
+ALTER SCHEMA Marketing
+TRANSFER AuctionsAndBidding.AuctionFollower
 
